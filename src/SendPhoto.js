@@ -54,7 +54,7 @@ export default function SendPhotoPage() {
 
     try {
       setLoading(true);
-      const response = await axios.post("http://localhost:5000/upload", formData, {
+      const response = await axios.post("https://acute-2.onrender.com/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -79,7 +79,7 @@ export default function SendPhotoPage() {
       setLoading(true);
 
       // Generate OTP
-      const otpResponse = await axios.get("http://localhost:5000/generate-otp");
+      const otpResponse = await axios.get("https://acute-2.onrender.com/generate-otp");
       const generatedOtp = otpResponse.data.otp;
       setOtp(generatedOtp);
 
