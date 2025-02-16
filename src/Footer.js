@@ -5,9 +5,9 @@ function Footer() {
   return (
     <footer className="footer glass-effect">
       <div className="footer-content">
-        <h3>PhotoZapp</h3>
+        <h3>Acute</h3>
         <p>
-          Secure, decentralized photo sharing powered by blockchain technology
+           Blockchain Based File Transfer Protocol.
         </p>
 
         <div className="footer-links">
