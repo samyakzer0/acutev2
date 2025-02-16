@@ -31,7 +31,7 @@ function Footer() {
         </div>
 
         <p className="copyright">
-          © {new Date().getFullYear()} PhotoChain. All rights reserved.
+          © {new Date().getFullYear()} Acute. All rights reserved.
         </p>
       </div>
     </footer>
