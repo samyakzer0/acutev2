@@ -13,7 +13,6 @@ function App() {
         <nav className="nav-bar glass-effect">
           <Link to="/" className="nav-logo">
     <img src = "/icon.png" alt= "Acute Logo" className= "logo-icon" />
-           // <span className="logo-text">Acute</span>
           </Link>
           <div className="nav-links">
             <Link to="/" className="nav-button">
