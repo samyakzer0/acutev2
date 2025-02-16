@@ -12,7 +12,7 @@ function App() {
       <div className="app-container">
         <nav className="nav-bar glass-effect">
           <Link to="/" className="nav-logo">
-            <span className="logo-text">PhotoZapp</span>
+            <span className="logo-text">Acute</span>
           </Link>
           <div className="nav-links">
             <Link to="/" className="nav-button">
