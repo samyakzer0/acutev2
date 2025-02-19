@@ -97,7 +97,7 @@ export default function SendPhotoPage() {
       setLoading(true);
 
       // Generate OTP
-      const otpResponse = await axios.get("https://acutev2.onrender.com/generate-otp", {
+      const otpResponse = await axios.post("https://acutev2.onrender.com/generate-otp", {
         recipient,
         ipfsHash
       });
