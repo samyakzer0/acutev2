@@ -2,16 +2,18 @@ import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import { ethers } from "ethers";
-import { Upload, Send, Loader, CheckCircle, Image } from 'lucide-react';
+import CryptoJS from "crypto-js"; // Import CryptoJS for encryption
+import { Upload, Send, Loader } from 'lucide-react';
 import PhotoZappABI from "./artifacts/PhotoTransfer.json";
 
-const CONTRACT_ADDRESS = "0x310D314A19425008c82994A1aD86c8191a067cF4";
+const CONTRACT_ADDRESS = "0x1B605fB6880c2d10334F69ffc920D61FE90f46a6";
 
 export default function SendPhotoPage() {
   const [recipient, setRecipient] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [ipfsHash, setIpfsHash] = useState("");
   const [otp, setOtp] = useState(null);
+  const [encryptionKey, setEncryptionKey] = useState("");
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
 
@@ -37,29 +39,45 @@ export default function SendPhotoPage() {
     },
     multiple: false
   });
-  // Handle file selection
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+
+  // 🔐 Encrypt the file before uploading
+  const encryptFile = async (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex); // 256-bit key
+        const encryptedData = CryptoJS.AES.encrypt(reader.result, key).toString();
+        setEncryptionKey(key);
+        resolve({ encryptedData, key });
+      };
+    });
   };
 
-  // Upload file to backend & Pinata
+  // ⬆️ Upload file to IPFS
   const handleUpload = async () => {
     if (!selectedFile) {
       alert("Please select a file first.");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
     try {
       setLoading(true);
+
+      // Encrypt the file
+      const { encryptedData, key } = await encryptFile(selectedFile);
+      setEncryptionKey(key);
+
+      const formData = new FormData();
+      formData.append("file", new Blob([encryptedData], { type: "text/plain" })); // Upload encrypted file
+
       const response = await axios.post("https://acute-2.onrender.com/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       setIpfsHash(response.data.ipfsHash);
       alert(`File uploaded! IPFS Hash: ${response.data.ipfsHash}`);
+
     } catch (error) {
       console.error("Upload failed:", error);
       alert("Upload failed. Please try again.");
@@ -68,9 +86,9 @@ export default function SendPhotoPage() {
     }
   };
 
-  // Send transaction to the blockchain using Ethers.js
+  // 📤 Send transaction to blockchain
   const sendPhoto = async () => {
-    if (!ipfsHash || !recipient) {
+    if (!ipfsHash || !recipient || !encryptionKey) {
       alert("Upload a file and enter a recipient address first!");
       return;
     }
@@ -79,24 +97,27 @@ export default function SendPhotoPage() {
       setLoading(true);
 
       // Generate OTP
-      const otpResponse = await axios.get("https://acute-2.onrender.com/generate-otp");
+      const otpResponse = await axios.post("https://acute-2.onrender.com/generate-otp", {
+        recipient,
+        ipfsHash
+      });
       const generatedOtp = otpResponse.data.otp;
       setOtp(generatedOtp);
 
-      // Check for MetaMask
       if (!window.ethereum) {
         alert("MetaMask not detected! Please install MetaMask.");
         return;
       }
 
-      // Connect to MetaMask
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, PhotoZappABI, signer);
 
-      // Send transaction to smart contract
-      const tx = await contract.sendFile(recipient, ipfsHash, String(generatedOtp));
-      await tx.wait(); // Wait for transaction confirmation
+      // 🔑 Encrypt key before sending (optional for extra security)
+      const encryptedKey = CryptoJS.AES.encrypt(encryptionKey, recipient).toString();
+
+      const tx = await contract.sendFile(recipient, ipfsHash, encryptedKey, String(generatedOtp));
+      await tx.wait(); // Wait for confirmation
 
       console.log("Transaction successful:", tx);
       alert(`Photo sent successfully! Transaction Hash: ${tx.hash}`);
@@ -122,10 +143,6 @@ export default function SendPhotoPage() {
           {preview ? (
             <div className="preview-container">
               <img src={preview} alt="Preview" className="file-preview" />
-              <div className="file-info">
-                <p>{selectedFile.name}</p>
-                <p>{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</p>
-              </div>
             </div>
           ) : (
             <div className="dropzone-content">
