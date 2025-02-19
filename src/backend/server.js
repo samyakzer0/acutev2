@@ -83,7 +83,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 });
 
 // 🔑 Route to generate OTP and associate it with a recipient
-app.get("/generate-otp", (req, res) => {
+app.post("/generate-otp", (req, res) => {
   const { recipient, ipfsHash } = req.body;
 
   if (!recipient || !ipfsHash) {
