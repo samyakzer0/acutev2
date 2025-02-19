@@ -5,7 +5,7 @@ const cors = require("cors");
 const crypto = require("crypto");
 const fs = require("fs");
 const FormData = require("form-data");
-const { exec } = require("child_process");  // Import exec for garbage collection
+const { exec } = require("child_process");  // For garbage collection
 require("dotenv").config();
 
 const app = express();
@@ -19,7 +19,10 @@ const upload = multer({ dest: "uploads/" });
 const PINATA_API_KEY = "b4fb0940751b4a3507c6";
 const PINATA_SECRET_API_KEY = "0856f18b69d0d05e37690ca13baad4b62fc9f363b1a98d1b5da3ccf9388bb192";
 
-// Function to unpin file from Pinata and trigger garbage collection
+// Store OTPs temporarily (in-memory storage)
+let otpStore = {};
+
+// 🗑️ Function to unpin file from Pinata & trigger garbage collection
 const unpinAndCleanup = async (cid) => {
   try {
     // Unpin from Pinata
@@ -46,7 +49,7 @@ const unpinAndCleanup = async (cid) => {
   }
 };
 
-// Route to upload file to Pinata
+// 📤 Route to upload **encrypted** file to Pinata
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const file = req.file;
@@ -67,9 +70,9 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     fs.unlinkSync(file.path);
 
     const ipfsHash = response.data.IpfsHash;
-    console.log(`✅ File uploaded: ${ipfsHash}`);
+    console.log(`✅ Encrypted file uploaded: ${ipfsHash}`);
 
-    // Schedule unpinning and garbage collection after 10 minutes
+    // Schedule unpinning & garbage collection after 10 minutes
     setTimeout(() => unpinAndCleanup(ipfsHash), 10 * 60 * 1000);
 
     res.json({ ipfsHash });
@@ -79,10 +82,38 @@ app.post("/upload", upload.single("file"), async (req, res) => {
   }
 });
 
-// Route to generate OTP
-app.get("/generate-otp", (req, res) => {
+// 🔑 Route to generate OTP and associate it with a recipient
+app.post("/generate-otp", (req, res) => {
+  const { recipient, ipfsHash } = req.body;
+
+  if (!recipient || !ipfsHash) {
+    return res.status(400).send("Recipient address and IPFS hash required");
+  }
+
   const otp = crypto.randomInt(100000, 999999);
+  otpStore[recipient] = { otp, ipfsHash };
+
+  console.log(`🔐 OTP generated: ${otp} for recipient ${recipient}`);
+
   res.json({ otp });
+});
+
+// 🔍 Route to verify OTP and return associated IPFS hash
+app.post("/verify-otp", (req, res) => {
+  const { recipient, otp } = req.body;
+
+  if (!recipient || !otp) {
+    return res.status(400).send("Recipient address and OTP required");
+  }
+
+  if (otpStore[recipient] && otpStore[recipient].otp == otp) {
+    const ipfsHash = otpStore[recipient].ipfsHash;
+    delete otpStore[recipient]; // Remove OTP after use
+    console.log(`✅ OTP verified! Returning IPFS hash: ${ipfsHash}`);
+    res.json({ ipfsHash });
+  } else {
+    res.status(401).send("Invalid OTP");
+  }
 });
 
 app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
