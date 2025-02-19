@@ -1,9 +1,9 @@
 import { ethers, BrowserProvider } from "ethers";
 import PhotoTransferArtifact from "./artifacts/PhotoTransfer.json"; // Import the ABI file
 
-const CONTRACT_ADDRESS = "0x310D314A19425008c82994A1aD86c8191a067cF4"; // Replace with your actual deployed contract address
+const CONTRACT_ADDRESS = "0x1B605fB6880c2d10334F69ffc920D61FE90f46a6"; // Replace with your actual deployed contract address
 
-// Function to get the BrowserProvider instance
+// 🔹 Get the BrowserProvider instance
 export const getProvider = () => {
   if (window.ethereum) {
     return new BrowserProvider(window.ethereum);
@@ -13,7 +13,7 @@ export const getProvider = () => {
   }
 };
 
-// Function to get the contract instance
+// 🔹 Get the contract instance
 export const getContract = async () => {
   const provider = getProvider();
   if (!provider) return;
@@ -22,30 +22,53 @@ export const getContract = async () => {
   return new ethers.Contract(CONTRACT_ADDRESS, PhotoTransferArtifact.abi, signer);
 };
 
-// Function to send a photo
-export const sendPhoto = async (recipient, ipfsHash, isEncrypted) => {
+// 📤 Send a photo (now includes `encKey` & `otp`)
+export const sendPhoto = async (recipient, ipfsHash, encKey, otp) => {
   try {
     const contract = await getContract();
     if (!contract) return;
 
-    const tx = await contract.sendFile(recipient, ipfsHash, String(generatedOtp));
-    await tx.wait(); // Wait for the transaction to be mined
-    console.log("Photo sent successfully");
+    const tx = await contract.sendFile(recipient, ipfsHash, encKey, otp);
+    await tx.wait(); // Wait for transaction confirmation
+    console.log("✅ Photo sent successfully!");
+    return tx.hash;
   } catch (error) {
-    console.error("Error sending photo:", error);
+    console.error("❌ Error sending photo:", error);
+    return null;
   }
 };
 
-// Function to retrieve a photo by its ID
-export const getPhoto = async (photoId) => {
+// 🔍 Retrieve a photo using OTP (fetches both `ipfsHash` & `encKey`)
+export const getFileByRecipient = async (otp) => {
   try {
     const contract = await getContract();
     if (!contract) return;
 
-    const ipfsHash = await contract.getPhoto(photoId);
-    return ipfsHash;
+    const [ipfsHash, encKey] = await contract.getFileByRecipient(otp);
+    console.log("📥 Retrieved file:", { ipfsHash, encKey });
+
+    if (!ipfsHash) {
+      console.warn("⚠️ No file found or invalid OTP.");
+      return null;
+    }
+
+    return { ipfsHash, encKey };
   } catch (error) {
-    console.error("Error retrieving photo:", error);
+    console.error("❌ Error retrieving file:", error);
     return null;
+  }
+};
+
+// 🚀 Mark file as accessed (deletes the encryption key)
+export const accessFile = async (otp) => {
+  try {
+    const contract = await getContract();
+    if (!contract) return;
+
+    const tx = await contract.accessFile(otp);
+    await tx.wait();
+    console.log("🔐 Encryption key deleted, file is now inaccessible.");
+  } catch (error) {
+    console.error("❌ Error accessing file:", error);
   }
 };
