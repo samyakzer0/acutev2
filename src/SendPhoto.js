@@ -6,7 +6,7 @@ import CryptoJS from "crypto-js"; // Import CryptoJS for encryption
 import { Upload, Send, Loader } from 'lucide-react';
 import PhotoZappABI from "./artifacts/PhotoTransfer.json";
 
-const CONTRACT_ADDRESS = "0x1B605fB6880c2d10334F69ffc920D61FE90f46a6";
+const CONTRACT_ADDRESS = "0x4684f4c3d42DD01802C67eb33b9a6104C59DA1DC";
 
 export default function SendPhotoPage() {
   const [recipient, setRecipient] = useState("");
