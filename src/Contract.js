@@ -1,14 +1,14 @@
 import { ethers, BrowserProvider } from "ethers";
-import PhotoTransferArtifact from "./artifacts/PhotoTransfer.json"; // Import the ABI file
+import PhotoTransferArtifact from "./artifacts/PhotoTransfer.json";
 
-const CONTRACT_ADDRESS = "0x4684f4c3d42DD01802C67eb33b9a6104C59DA1DC"; // Replace with your actual deployed contract address
+const CONTRACT_ADDRESS = "0x4684f4c3d42DD01802C67eb33b9a6104C59DA1DC"; // Replace with actual deployed address
 
 // 🔹 Get the BrowserProvider instance
 export const getProvider = () => {
   if (window.ethereum) {
     return new BrowserProvider(window.ethereum);
   } else {
-    console.error("Please install MetaMask!");
+    alert("❌ MetaMask not detected! Please install MetaMask.");
     return null;
   }
 };
@@ -16,21 +16,23 @@ export const getProvider = () => {
 // 🔹 Get the contract instance
 export const getContract = async () => {
   const provider = getProvider();
-  if (!provider) return;
+  if (!provider) return null;
 
   const signer = await provider.getSigner();
   return new ethers.Contract(CONTRACT_ADDRESS, PhotoTransferArtifact.abi, signer);
 };
 
-// 📤 Send a photo (now includes `encKey` & `otp`)
+// 📤 Send a photo (Includes `encKey` & `otp`)
 export const sendPhoto = async (recipient, ipfsHash, encKey, otp) => {
   try {
     const contract = await getContract();
     if (!contract) return;
 
-    const tx = await contract.sendFile(recipient, ipfsHash, encKey, otp);
-    await tx.wait(); // Wait for transaction confirmation
-    console.log("✅ Photo sent successfully!");
+    console.log("🚀 Sending File with OTP:", String(otp).trim());
+
+    const tx = await contract.sendFile(recipient, ipfsHash, encKey, String(otp).trim());
+    await tx.wait();
+    console.log("✅ Photo sent successfully!", tx.hash);
     return tx.hash;
   } catch (error) {
     console.error("❌ Error sending photo:", error);
@@ -44,10 +46,12 @@ export const getFileByRecipient = async (otp) => {
     const contract = await getContract();
     if (!contract) return;
 
-    const [ipfsHash, encKey] = await contract.getFileByRecipient(otp);
+    console.log("🔍 Retrieving file with OTP:", String(otp).trim());
+
+    const [ipfsHash, encKey] = await contract.getFileByRecipient(String(otp).trim());
     console.log("📥 Retrieved file:", { ipfsHash, encKey });
 
-    if (!ipfsHash) {
+    if (!ipfsHash || ipfsHash === "") {
       console.warn("⚠️ No file found or invalid OTP.");
       return null;
     }
@@ -65,7 +69,9 @@ export const accessFile = async (otp) => {
     const contract = await getContract();
     if (!contract) return;
 
-    const tx = await contract.accessFile(otp);
+    console.log("🔓 Marking file as accessed with OTP:", String(otp).trim());
+
+    const tx = await contract.accessFile(String(otp).trim());
     await tx.wait();
     console.log("🔐 Encryption key deleted, file is now inaccessible.");
   } catch (error) {
