@@ -4,7 +4,7 @@ import CryptoJS from "crypto-js"; // Import CryptoJS for decryption
 import contractABI from "./artifacts/PhotoTransfer.json";
 import { Download, Loader, Key, Image } from 'lucide-react';
 
-const CONTRACT_ADDRESS = "0x4684f4c3d42DD01802C67eb33b9a6104C59DA1DC";
+const CONTRACT_ADDRESS = "0x444CE1A913DEDBAEE39eD59B77B3D7D5De6b7452";
 
 function RetrievePhotoPage() {
   const [walletAddress, setWalletAddress] = useState("");
