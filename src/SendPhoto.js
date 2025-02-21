@@ -116,7 +116,7 @@ export default function SendPhotoPage() {
       // 🔑 Encrypt key before sending (optional for extra security)
       const encryptedKey = CryptoJS.AES.encrypt(encryptionKey, recipient).toString();
 
-      const tx = await contract.sendFile(recipient, ipfsHash, encryptedKey, String(generatedOtp));
+      const tx = await contract.sendFile(recipient, ipfsHash, String(generatedOtp));
       await tx.wait(); // Wait for confirmation
 
       console.log("Transaction successful:", tx);
