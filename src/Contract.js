@@ -1,7 +1,7 @@
 import { ethers, BrowserProvider } from "ethers";
 import PhotoTransferArtifact from "./artifacts/PhotoTransfer.json";
 
-const CONTRACT_ADDRESS = "0x4684f4c3d42DD01802C67eb33b9a6104C59DA1DC"; // Replace with actual deployed address
+const CONTRACT_ADDRESS = "0x444CE1A913DEDBAEE39eD59B77B3D7D5De6b7452"; // Replace with actual deployed address
 
 // 🔹 Get the BrowserProvider instance
 export const getProvider = () => {
