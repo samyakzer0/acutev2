@@ -42,7 +42,7 @@ export default function SendPhotoPage() {
 
   // 🔐 Encrypt the file before uploading
   const encryptFile = async (file) => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
@@ -51,10 +51,11 @@ export default function SendPhotoPage() {
         setEncryptionKey(key);
         resolve({ encryptedData, key });
       };
+      reader.onerror = (error) => reject(error);
     });
   };
 
-  // ⬆️ Upload file to IPFS
+  // ⬆️ Upload encrypted file to IPFS
   const handleUpload = async () => {
     if (!selectedFile) {
       alert("Please select a file first.");
@@ -67,6 +68,7 @@ export default function SendPhotoPage() {
       // Encrypt the file
       const { encryptedData, key } = await encryptFile(selectedFile);
       setEncryptionKey(key);
+      console.log("🔐 Encryption Key Generated:", key);
 
       const formData = new FormData();
       formData.append("file", new Blob([encryptedData], { type: "text/plain" })); // Upload encrypted file
@@ -76,10 +78,11 @@ export default function SendPhotoPage() {
       });
 
       setIpfsHash(response.data.ipfsHash);
+      console.log("✅ File Uploaded! IPFS Hash:", response.data.ipfsHash);
       alert(`File uploaded! IPFS Hash: ${response.data.ipfsHash}`);
 
     } catch (error) {
-      console.error("Upload failed:", error);
+      console.error("❌ Upload failed:", error);
       alert("Upload failed. Please try again.");
     } finally {
       setLoading(false);
@@ -97,12 +100,14 @@ export default function SendPhotoPage() {
       setLoading(true);
 
       // Generate OTP
+      console.log("📢 Requesting OTP...");
       const otpResponse = await axios.post("https://acutev2.onrender.com/generate-otp", {
         recipient,
         ipfsHash
       });
       const generatedOtp = otpResponse.data.otp;
       setOtp(generatedOtp);
+      console.log("🔑 Generated OTP:", generatedOtp);
 
       if (!window.ethereum) {
         alert("MetaMask not detected! Please install MetaMask.");
@@ -113,17 +118,24 @@ export default function SendPhotoPage() {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, PhotoZappABI, signer);
 
-      // 🔑 Encrypt key before sending (optional for extra security)
+      // 🔑 Encrypt key before sending to smart contract (optional for extra security)
       const encryptedKey = CryptoJS.AES.encrypt(encryptionKey, recipient).toString();
+      console.log("🔐 Encrypted Key Before Sending:", encryptedKey);
 
-      const tx = await contract.sendFile(recipient, ipfsHash, encryptedKey, String(generatedOtp));
+      console.log("🚀 Sending transaction...");
+      const tx = await contract.sendFile(
+        recipient, 
+        ipfsHash, 
+        encryptedKey, 
+        String(generatedOtp)
+      );
       await tx.wait(); // Wait for confirmation
 
-      console.log("Transaction successful:", tx);
+      console.log("✅ Transaction successful:", tx);
       alert(`Photo sent successfully! Transaction Hash: ${tx.hash}`);
 
     } catch (error) {
-      console.error("Transaction failed:", error);
+      console.error("❌ Transaction failed:", error);
       alert("Failed to send photo. Please try again.");
     } finally {
       setLoading(false);
