@@ -3,7 +3,7 @@ import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import { ethers } from "ethers";
 import CryptoJS from "crypto-js"; // Import CryptoJS for encryption
-import { Upload, Send, Loader } from 'lucide-react';
+import { Upload, Send, Loader } from "lucide-react";
 import PhotoZappABI from "./artifacts/PhotoTransfer.json";
 
 const CONTRACT_ADDRESS = "0x444CE1A913DEDBAEE39eD59B77B3D7D5De6b7452";
@@ -20,34 +20,25 @@ export default function SendPhotoPage() {
   const onDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
     setSelectedFile(file);
-    
-    // Create preview
     const objectUrl = URL.createObjectURL(file);
     setPreview(objectUrl);
-    
     return () => URL.revokeObjectURL(objectUrl);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      "image/*": [".jpeg", ".png", ".jpg", ".gif"],
-      "video/*": [".mp4", ".avi", ".mov"],
-      "application/pdf": [".pdf"],
-      "application/msword": [".doc", ".docx"],
-      "text/plain": [".txt"]
-    },
-    multiple: false
+    multiple: false,
   });
 
-  // 🔐 Encrypt the file before uploading
+  // 🔐 Encrypt the file as raw binary data
   const encryptFile = async (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.readAsDataURL(file);
+      reader.readAsArrayBuffer(file); // Read as binary
       reader.onload = () => {
-        const key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex); // 256-bit key
-        const encryptedData = CryptoJS.AES.encrypt(reader.result, key).toString();
+        const key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
+        const wordArray = CryptoJS.lib.WordArray.create(reader.result);
+        const encryptedData = CryptoJS.AES.encrypt(wordArray, key).toString();
         setEncryptionKey(key);
         resolve({ encryptedData, key });
       };
@@ -64,14 +55,12 @@ export default function SendPhotoPage() {
 
     try {
       setLoading(true);
-
-      // Encrypt the file
       const { encryptedData, key } = await encryptFile(selectedFile);
       setEncryptionKey(key);
       console.log("🔐 Encryption Key Generated:", key);
 
       const formData = new FormData();
-      formData.append("file", new Blob([encryptedData], { type: "text/plain" })); // Upload encrypted file
+      formData.append("file", new Blob([encryptedData], { type: "application/octet-stream" })); // Upload encrypted file
 
       const response = await axios.post("https://acutev2.onrender.com/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -118,7 +107,7 @@ export default function SendPhotoPage() {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, PhotoZappABI, signer);
 
-      // 🔑 Encrypt key before sending to smart contract (optional for extra security)
+      // 🔑 Encrypt key before sending to smart contract
       const encryptedKey = CryptoJS.AES.encrypt(encryptionKey, recipient).toString();
       console.log("🔐 Encrypted Key Before Sending:", encryptedKey);
 
