@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ethers, BrowserProvider } from "ethers";
-import CryptoJS from "crypto-js"; // Import CryptoJS for decryption
+import CryptoJS from "crypto-js";
 import contractABI from "./artifacts/PhotoTransfer.json";
 import { Download, Loader } from "lucide-react";
 
@@ -11,7 +11,7 @@ function RetrievePhotoPage() {
   const [otp, setOtp] = useState("");
   const [ipfsHash, setIpfsHash] = useState("");
   const [retrievedFile, setRetrievedFile] = useState(null);
-  const [fileType, setFileType] = useState(""); // ✅ Store file MIME type
+  const [fileType, setFileType] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -87,8 +87,14 @@ function RetrievePhotoPage() {
     try {
       console.log("📥 Fetching encrypted file from IPFS...");
       const response = await fetch(`https://ipfs.io/ipfs/${ipfsHash}`);
-      const encryptedData = await response.text(); // Get encrypted Base64 file data
-      console.log("🛠️ Encrypted File Data Length:", encryptedData.length);
+      const encryptedDataBase64 = await response.text(); // Encrypted Base64 file data
+      console.log("🛠️ Encrypted File Data Length:", encryptedDataBase64.length);
+
+      // ✅ Decode the Base64 encrypted data first
+      const decodedPayload = atob(encryptedDataBase64);
+      const [mimeType, encryptedData] = decodedPayload.split("::"); // Extract MIME type and data
+      setFileType(mimeType);
+      console.log("📂 Extracted File Type:", mimeType);
 
       // 🔓 **Decrypt the file using the correct key**
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, decryptedKey);
@@ -100,11 +106,6 @@ function RetrievePhotoPage() {
 
       console.log("✅ Decrypted File Data (Base64):", decryptedBase64);
 
-      // ✅ **Detect original file type**
-      const detectedType = determineFileType(decryptedBase64);
-      setFileType(detectedType);
-      console.log("📂 File Type Detected:", detectedType);
-
       // Convert decrypted Base64 data to Blob
       const byteCharacters = atob(decryptedBase64);
       const byteArrays = new Uint8Array(byteCharacters.length);
@@ -112,7 +113,7 @@ function RetrievePhotoPage() {
         byteArrays[i] = byteCharacters.charCodeAt(i);
       }
 
-      const blob = new Blob([byteArrays], { type: detectedType });
+      const blob = new Blob([byteArrays], { type: mimeType });
       const objectUrl = URL.createObjectURL(blob);
       setRetrievedFile(objectUrl);
 
@@ -143,20 +144,6 @@ function RetrievePhotoPage() {
     } catch (error) {
       console.error("❌ Failed to delete encryption key:", error);
     }
-  };
-
-  // 🔎 **Detect file type from Base64 header**
-  const determineFileType = (base64Data) => {
-    const header = base64Data.substring(0, 50);
-    if (header.includes("JVBER")) return "application/pdf"; // PDF
-    if (header.includes("PK")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"; // DOCX
-    if (header.includes("iVBOR")) return "image/png"; // PNG
-    if (header.includes("/9j/")) return "image/jpeg"; // JPG
-    if (header.includes("R0lGOD")) return "image/gif"; // GIF
-    if (header.includes("UklGR")) return "image/webp"; // WEBP
-    if (header.includes("GIF8")) return "image/gif"; // GIF
-    if (header.includes("data:video")) return "video/mp4"; // MP4
-    return "application/octet-stream"; // Default (binary)
   };
 
   return (
