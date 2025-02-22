@@ -21,7 +21,7 @@ export default function SendPhotoPage() {
   const onDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
     setSelectedFile(file);
-    setFileType(file.type); // ✅ Store file type
+    setFileType(file.type); 
 
     if (file.type.startsWith("image")) {
       const objectUrl = URL.createObjectURL(file);
@@ -44,7 +44,7 @@ export default function SendPhotoPage() {
         const key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
         const wordArray = CryptoJS.lib.WordArray.create(reader.result);
         const encryptedData = CryptoJS.AES.encrypt(wordArray, key).toString();
-        setEncryptionKey(key);
+        setEncryptionKey(key); // ✅ Directly storing encryption key, no extra encryption
 
         // ✅ Store MIME type along with encrypted data
         const payload = `${file.type}::${encryptedData}`;
@@ -117,15 +117,11 @@ export default function SendPhotoPage() {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, PhotoZappABI, signer);
 
-      // 🔑 Encrypt key before sending to smart contract
-      const encryptedKey = CryptoJS.AES.encrypt(encryptionKey, recipient).toString();
-      console.log("🔐 Encrypted Key Before Sending:", encryptedKey);
-
       console.log("🚀 Sending transaction...");
       const tx = await contract.sendFile(
         recipient, 
         ipfsHash, 
-        encryptedKey, 
+        encryptionKey,  // ✅ Directly storing encryption key, no extra encryption
         String(generatedOtp)
       );
       await tx.wait(); // Wait for confirmation
