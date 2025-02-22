@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import { ethers } from "ethers";
-import CryptoJS from "crypto-js"; // Import CryptoJS for encryption
+import CryptoJS from "crypto-js";
 import { Upload, Send, Loader } from "lucide-react";
 import PhotoZappABI from "./artifacts/PhotoTransfer.json";
 
@@ -14,15 +14,20 @@ export default function SendPhotoPage() {
   const [ipfsHash, setIpfsHash] = useState("");
   const [otp, setOtp] = useState(null);
   const [encryptionKey, setEncryptionKey] = useState("");
+  const [fileType, setFileType] = useState(""); // ✅ Store original file type
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
 
   const onDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
     setSelectedFile(file);
-    const objectUrl = URL.createObjectURL(file);
-    setPreview(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
+    setFileType(file.type); // ✅ Store file type
+
+    if (file.type.startsWith("image")) {
+      const objectUrl = URL.createObjectURL(file);
+      setPreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -34,13 +39,19 @@ export default function SendPhotoPage() {
   const encryptFile = async (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.readAsArrayBuffer(file); // Read as binary
+      reader.readAsArrayBuffer(file);
       reader.onload = () => {
         const key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
         const wordArray = CryptoJS.lib.WordArray.create(reader.result);
         const encryptedData = CryptoJS.AES.encrypt(wordArray, key).toString();
         setEncryptionKey(key);
-        resolve({ encryptedData, key });
+
+        const payload = JSON.stringify({
+          encryptedData: encryptedData,
+          fileType: file.type, // ✅ Store the file type
+        });
+
+        resolve({ encryptedData: btoa(payload), key });
       };
       reader.onerror = (error) => reject(error);
     });
@@ -55,12 +66,14 @@ export default function SendPhotoPage() {
 
     try {
       setLoading(true);
+
+      // Encrypt the file
       const { encryptedData, key } = await encryptFile(selectedFile);
       setEncryptionKey(key);
       console.log("🔐 Encryption Key Generated:", key);
 
       const formData = new FormData();
-      formData.append("file", new Blob([encryptedData], { type: "application/octet-stream" })); // Upload encrypted file
+      formData.append("file", new Blob([encryptedData], { type: "application/octet-stream" }));
 
       const response = await axios.post("https://acutev2.onrender.com/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -121,7 +134,7 @@ export default function SendPhotoPage() {
       await tx.wait(); // Wait for confirmation
 
       console.log("✅ Transaction successful:", tx);
-      alert(`Photo sent successfully! Transaction Hash: ${tx.hash}`);
+      alert(`File sent successfully! Transaction Hash: ${tx.hash}`);
 
     } catch (error) {
       console.error("❌ Transaction failed:", error);
@@ -135,11 +148,8 @@ export default function SendPhotoPage() {
     <div className="page-container">
       <div className="form-container glass-effect">
         <h2 className="section-title">Send File!</h2>
-        
-        <div 
-          {...getRootProps()} 
-          className={`dropzone ${isDragActive ? 'active' : ''} ${selectedFile ? 'has-file' : ''}`}
-        >
+
+        <div {...getRootProps()} className="dropzone">
           <input {...getInputProps()} />
           {preview ? (
             <div className="preview-container">
@@ -153,11 +163,7 @@ export default function SendPhotoPage() {
           )}
         </div>
 
-        <button 
-          className="action-button upload-button"
-          onClick={handleUpload} 
-          disabled={!selectedFile || loading}
-        >
+        <button className="action-button upload-button" onClick={handleUpload} disabled={!selectedFile || loading}>
           {loading ? <Loader className="spin" /> : <Upload size={20} />}
           <span>{loading ? "Uploading..." : "Upload to IPFS"}</span>
         </button>
@@ -177,13 +183,9 @@ export default function SendPhotoPage() {
           onChange={(e) => setRecipient(e.target.value)}
         />
 
-        <button 
-          className="action-button send-button"
-          onClick={sendPhoto}
-          disabled={!ipfsHash || !recipient || loading}
-        >
+        <button className="action-button send-button" onClick={sendPhoto} disabled={!ipfsHash || !recipient || loading}>
           {loading ? <Loader className="spin" /> : <Send size={20} />}
-          <span>{loading ? "Processing..." : "Send Photo"}</span>
+          <span>{loading ? "Processing..." : "Send File"}</span>
         </button>
 
         {otp && (
