@@ -21,7 +21,7 @@ export default function SendPhotoPage() {
   const onDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
     setSelectedFile(file);
-    setFileType(file.type); 
+    setFileType(file.type);
 
     if (file.type.startsWith("image")) {
       const objectUrl = URL.createObjectURL(file);
@@ -37,23 +37,23 @@ export default function SendPhotoPage() {
 
   // 🔐 Encrypt the file & store as Base64
   const encryptFile = async (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-    reader.onload = () => {
-      const key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
-      const wordArray = CryptoJS.lib.WordArray.create(reader.result);
-      const encryptedData = CryptoJS.AES.encrypt(wordArray, key).toString();
-      setEncryptionKey(key);
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file);
+      reader.onload = () => {
+        const key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
+        const wordArray = CryptoJS.lib.WordArray.create(reader.result);
+        const encryptedData = CryptoJS.AES.encrypt(wordArray, key).toString();
+        setEncryptionKey(key);
 
-      // ✅ Store both MIME type & file extension along with encrypted data
-      const fileExt = file.name.split('.').pop(); // Extract file extension
-      const payload = `${file.type}::${fileExt}::${encryptedData}`;
-      resolve({ encryptedData: btoa(payload), key });
-    };
-    reader.onerror = (error) => reject(error);
-  });
-};
+        // ✅ Store both MIME type & file extension along with encrypted data
+        const fileExt = file.name.split(".").pop() || "bin"; // Extract file extension, fallback to "bin"
+        const payload = `${file.type}::${fileExt}::${encryptedData}`;
+        resolve({ encryptedData: btoa(payload), key });
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
 
   // ⬆️ Upload encrypted file to IPFS
   const handleUpload = async () => {
