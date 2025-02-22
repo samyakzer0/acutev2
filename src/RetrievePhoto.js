@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ethers, BrowserProvider } from "ethers";
 import CryptoJS from "crypto-js"; // Import CryptoJS for decryption
 import contractABI from "./artifacts/PhotoTransfer.json";
-import { Download, Loader, Image } from "lucide-react";
+import { Download, Loader } from "lucide-react";
 
 const CONTRACT_ADDRESS = "0x444CE1A913DEDBAEE39eD59B77B3D7D5De6b7452";
 
@@ -12,6 +12,7 @@ function RetrievePhotoPage() {
   const [ipfsHash, setIpfsHash] = useState("");
   const [decryptionKey, setDecryptionKey] = useState("");
   const [retrievedFile, setRetrievedFile] = useState(null);
+  const [fileType, setFileType] = useState(""); // ✅ Store file MIME type
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -95,22 +96,27 @@ function RetrievePhotoPage() {
 
       // 🔓 Decrypt the file
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, decryptedKey);
-      const decryptedData = decryptedBytes.toString(CryptoJS.enc.Latin1);
+      const decryptedBase64 = decryptedBytes.toString(CryptoJS.enc.Base64);
 
-      if (!decryptedData) {
+      if (!decryptedBase64) {
         throw new Error("❌ Decryption failed: Empty output.");
       }
 
-      console.log("✅ Decrypted File Data:", decryptedData);
+      console.log("✅ Decrypted File Data (Base64):", decryptedBase64);
+
+      // ✅ **Detect original file type**
+      const detectedType = determineFileType(decryptedBase64);
+      setFileType(detectedType);
+      console.log("📂 File Type Detected:", detectedType);
 
       // Convert decrypted data to Blob
-      const byteCharacters = atob(decryptedData);
+      const byteCharacters = atob(decryptedBase64);
       const byteArrays = new Uint8Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
         byteArrays[i] = byteCharacters.charCodeAt(i);
       }
 
-      const blob = new Blob([byteArrays], { type: "application/octet-stream" }); // Generic MIME type
+      const blob = new Blob([byteArrays], { type: detectedType });
       const objectUrl = URL.createObjectURL(blob);
       setRetrievedFile(objectUrl);
 
@@ -143,6 +149,20 @@ function RetrievePhotoPage() {
     }
   };
 
+  // 🔎 **Detect file type from Base64 header**
+  const determineFileType = (base64Data) => {
+    const header = base64Data.substring(0, 50);
+    if (header.includes("JVBER")) return "application/pdf"; // PDF
+    if (header.includes("PK")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"; // DOCX
+    if (header.includes("iVBOR")) return "image/png"; // PNG
+    if (header.includes("/9j/")) return "image/jpeg"; // JPG
+    if (header.includes("R0lGOD")) return "image/gif"; // GIF
+    if (header.includes("UklGR")) return "image/webp"; // WEBP
+    if (header.includes("GIF8")) return "image/gif"; // GIF
+    if (header.includes("data:video")) return "video/mp4"; // MP4
+    return "application/octet-stream"; // Default (binary)
+  };
+
   return (
     <div className="page-container">
       <div className="form-container glass-effect">
@@ -164,17 +184,13 @@ function RetrievePhotoPage() {
           disabled={loading}
         >
           {loading ? <Loader className="spin" /> : <Download size={20} />}
-          <span>{loading ? "Retrieving..." : "Retrieve Photo"}</span>
+          <span>{loading ? "Retrieving..." : "Retrieve File"}</span>
         </button>
 
         {retrievedFile && (
           <div className="retrieved-content glass-effect">
-            <div className="image-preview-container">
-              <img src={retrievedFile} alt="Retrieved" className="retrieved-image" />
-            </div>
-
-            <a href={retrievedFile} download="decrypted-file" className="view-button glass-effect">
-              <Image size={20} />
+            <a href={retrievedFile} download={`decrypted-file.${fileType.split("/")[1]}`} className="view-button glass-effect">
+              <Download size={20} />
               <span>Download File</span>
             </a>
           </div>
