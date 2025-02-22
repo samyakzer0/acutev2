@@ -75,38 +75,42 @@ function RetrievePhotoPage() {
 
   // 🔓 Decrypt and Download the File
   const decryptAndDownloadFile = async (ipfsHash, encryptionKey) => {
-  try {
-    console.log("📥 Fetching encrypted file from IPFS...");
-    const response = await fetch(`https://ipfs.io/ipfs/${ipfsHash}`);
-    const encryptedDataBase64 = await response.text();
-    console.log("🛠️ Encrypted File Data Length:", encryptedDataBase64.length);
+    try {
+      console.log("📥 Fetching encrypted file from IPFS...");
+      const response = await fetch(`https://ipfs.io/ipfs/${ipfsHash}`);
+      const encryptedDataBase64 = await response.text();
+      console.log("🛠️ Encrypted File Data Length:", encryptedDataBase64.length);
 
-    // ✅ Decode the Base64 encrypted data
-    const decodedPayload = atob(encryptedDataBase64);
-    const [mimeType, fileExt, encryptedData] = decodedPayload.split("::"); // Extract MIME type & extension
-    setFileType(fileExt); // Store original extension
-    console.log("📂 Extracted File Type:", mimeType, "Extension:", fileExt);
+      // ✅ Decode the Base64 encrypted data
+      const decodedPayload = atob(encryptedDataBase64);
+      const [mimeType, fileExt, encryptedData] = decodedPayload.split("::"); // Extract MIME type & extension
+      
+      // ✅ Ensure correct file extension
+      const validFileExtension = fileExt || mimeType.split("/")[1] || "bin";
+      setFileType(validFileExtension);
+      
+      console.log("📂 Extracted File Type:", mimeType, "Extension:", validFileExtension);
 
-    // 🔓 **Decrypt the file using the correct key**
-    const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, encryptionKey);
-    const decryptedBase64 = decryptedBytes.toString(CryptoJS.enc.Base64);
+      // 🔓 **Decrypt the file using the correct key**
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, encryptionKey);
+      const decryptedBase64 = decryptedBytes.toString(CryptoJS.enc.Base64);
 
-    if (!decryptedBase64) {
-      throw new Error("❌ Decryption failed: Empty output.");
-    }
+      if (!decryptedBase64) {
+        throw new Error("❌ Decryption failed: Empty output.");
+      }
 
-    console.log("✅ Decrypted File Data (Base64):", decryptedBase64);
+      console.log("✅ Decrypted File Data (Base64):", decryptedBase64);
 
-    // Convert decrypted Base64 data to Blob
-    const byteCharacters = atob(decryptedBase64);
-    const byteArrays = new Uint8Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteArrays[i] = byteCharacters.charCodeAt(i);
-    }
+      // Convert decrypted Base64 data to Blob
+      const byteCharacters = atob(decryptedBase64);
+      const byteArrays = new Uint8Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteArrays[i] = byteCharacters.charCodeAt(i);
+      }
 
-    const blob = new Blob([byteArrays], { type: mimeType });
-    const objectUrl = URL.createObjectURL(blob);
-    setRetrievedFile(objectUrl);
+      const blob = new Blob([byteArrays], { type: mimeType });
+      const objectUrl = URL.createObjectURL(blob);
+      setRetrievedFile(objectUrl);
 
       // 🔥 Call smart contract to delete the encryption key **only if decryption succeeds**
       await accessAndDeleteKey();
@@ -164,10 +168,9 @@ function RetrievePhotoPage() {
         {retrievedFile && (
           <div className="retrieved-content glass-effect">
             <a href={retrievedFile} download={`decrypted-file.${fileType}`} className="view-button glass-effect">
-            <Download size={20} />
+              <Download size={20} />
               <span>Download File</span>
-              </a>
-
+            </a>
           </div>
         )}
       </div>
