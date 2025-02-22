@@ -37,22 +37,23 @@ export default function SendPhotoPage() {
 
   // 🔐 Encrypt the file & store as Base64
   const encryptFile = async (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsArrayBuffer(file);
-      reader.onload = () => {
-        const key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
-        const wordArray = CryptoJS.lib.WordArray.create(reader.result);
-        const encryptedData = CryptoJS.AES.encrypt(wordArray, key).toString();
-        setEncryptionKey(key); // ✅ Directly storing encryption key, no extra encryption
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onload = () => {
+      const key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
+      const wordArray = CryptoJS.lib.WordArray.create(reader.result);
+      const encryptedData = CryptoJS.AES.encrypt(wordArray, key).toString();
+      setEncryptionKey(key);
 
-        // ✅ Store MIME type along with encrypted data
-        const payload = `${file.type}::${encryptedData}`;
-        resolve({ encryptedData: btoa(payload), key });
-      };
-      reader.onerror = (error) => reject(error);
-    });
-  };
+      // ✅ Store both MIME type & file extension along with encrypted data
+      const fileExt = file.name.split('.').pop(); // Extract file extension
+      const payload = `${file.type}::${fileExt}::${encryptedData}`;
+      resolve({ encryptedData: btoa(payload), key });
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};
 
   // ⬆️ Upload encrypted file to IPFS
   const handleUpload = async () => {
