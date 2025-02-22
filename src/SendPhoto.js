@@ -14,7 +14,7 @@ export default function SendPhotoPage() {
   const [ipfsHash, setIpfsHash] = useState("");
   const [otp, setOtp] = useState(null);
   const [encryptionKey, setEncryptionKey] = useState("");
-  const [fileType, setFileType] = useState(""); // ✅ Store original file type
+  const [fileType, setFileType] = useState("");
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
 
@@ -35,7 +35,7 @@ export default function SendPhotoPage() {
     multiple: false,
   });
 
-  // 🔐 Encrypt the file as raw binary data
+  // 🔐 Encrypt the file & store as Base64
   const encryptFile = async (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -46,11 +46,8 @@ export default function SendPhotoPage() {
         const encryptedData = CryptoJS.AES.encrypt(wordArray, key).toString();
         setEncryptionKey(key);
 
-        const payload = JSON.stringify({
-          encryptedData: encryptedData,
-          fileType: file.type, // ✅ Store the file type
-        });
-
+        // ✅ Store MIME type along with encrypted data
+        const payload = `${file.type}::${encryptedData}`;
         resolve({ encryptedData: btoa(payload), key });
       };
       reader.onerror = (error) => reject(error);
