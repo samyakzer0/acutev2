@@ -34,7 +34,7 @@ function RetrievePhotoPage() {
     }
   };
 
-  // 🔍 Retrieve File & Encrypted Key from Contract
+  // 🔍 Retrieve File & Encryption Key from Contract
   const handleRetrieve = async () => {
     try {
       setLoading(true);
@@ -50,30 +50,21 @@ function RetrievePhotoPage() {
 
       console.log("📢 Fetching file from smart contract...");
 
-      // Call contract to get IPFS Hash & Encrypted Key
-      const [retrievedHash, encryptedKey] = await contract.getFileByRecipient(String(otp));
+      // Call contract to get IPFS Hash & Encryption Key
+      const [retrievedHash, encryptionKey] = await contract.getFileByRecipient(String(otp));
 
       console.log("🔗 IPFS Hash:", retrievedHash);
-      console.log("🔑 Encrypted Key (from contract):", encryptedKey);
+      console.log("🔑 Encryption Key (from contract):", encryptionKey);
 
-      if (!retrievedHash || !encryptedKey) {
+      if (!retrievedHash || !encryptionKey) {
         alert("No file found or incorrect OTP.");
         return;
       }
 
       setIpfsHash(retrievedHash);
 
-      // 🔑 **Decrypt the encryption key before using it**
-      const decryptedKey = CryptoJS.AES.decrypt(encryptedKey, walletAddress).toString(CryptoJS.enc.Utf8);
-      
-      if (!decryptedKey) {
-        throw new Error("❌ Decryption failed: Invalid key.");
-      }
-
-      console.log("✅ Decrypted Key (Original Encryption Key):", decryptedKey);
-
-      // 🔑 Proceed with decryption
-      await decryptAndDownloadFile(retrievedHash, decryptedKey);
+      // 🔑 Proceed with decryption using the retrieved encryption key
+      await decryptAndDownloadFile(retrievedHash, encryptionKey);
     } catch (error) {
       console.error("❌ Error retrieving file:", error);
       alert("Error retrieving file. Please try again.");
@@ -83,11 +74,11 @@ function RetrievePhotoPage() {
   };
 
   // 🔓 Decrypt and Download the File
-  const decryptAndDownloadFile = async (ipfsHash, decryptedKey) => {
+  const decryptAndDownloadFile = async (ipfsHash, encryptionKey) => {
     try {
       console.log("📥 Fetching encrypted file from IPFS...");
       const response = await fetch(`https://ipfs.io/ipfs/${ipfsHash}`);
-      const encryptedDataBase64 = await response.text(); // Encrypted Base64 file data
+      const encryptedDataBase64 = await response.text();
       console.log("🛠️ Encrypted File Data Length:", encryptedDataBase64.length);
 
       // ✅ Decode the Base64 encrypted data first
@@ -97,7 +88,7 @@ function RetrievePhotoPage() {
       console.log("📂 Extracted File Type:", mimeType);
 
       // 🔓 **Decrypt the file using the correct key**
-      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, decryptedKey);
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, encryptionKey);
       const decryptedBase64 = decryptedBytes.toString(CryptoJS.enc.Base64);
 
       if (!decryptedBase64) {
