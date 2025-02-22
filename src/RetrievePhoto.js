@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ethers, Contract, BrowserProvider } from "ethers";
+import { ethers, BrowserProvider } from "ethers";
 import CryptoJS from "crypto-js"; // Import CryptoJS for decryption
 import contractABI from "./artifacts/PhotoTransfer.json";
 import { Download, Loader, Image } from "lucide-react";
@@ -75,37 +75,46 @@ function RetrievePhotoPage() {
   };
 
   // 🔓 Decrypt and Download the File
-  const decryptAndDownloadFile = async (ipfsHash, decryptionKey) => {
+  const decryptAndDownloadFile = async (ipfsHash, encryptedKey) => {
     try {
       console.log("📥 Fetching encrypted file from IPFS...");
       const response = await fetch(`https://ipfs.io/ipfs/${ipfsHash}`);
       const encryptedData = await response.text(); // Get encrypted Base64 file data
       console.log("🛠️ Encrypted Data:", encryptedData);
 
-      console.log("🔑 Using Encryption Key:", decryptionKey);
+      console.log("🔑 Using Encryption Key:", encryptedKey);
 
       // ✅ Fix: Proper decoding & decryption
-      const bytes = CryptoJS.AES.decrypt(encryptedData, decryptionKey);
-      const decryptedBase64 = bytes.toString(CryptoJS.enc.Base64);
+      const decryptedKey = CryptoJS.AES.decrypt(encryptedKey, walletAddress).toString(CryptoJS.enc.Utf8);
+      
+      if (!decryptedKey) {
+        throw new Error("❌ Decryption failed: Invalid key.");
+      }
 
-      if (!decryptedBase64) {
+      console.log("✅ Decrypted Key:", decryptedKey);
+
+      // 🔓 Decrypt the file
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, decryptedKey);
+      const decryptedData = decryptedBytes.toString(CryptoJS.enc.Latin1);
+
+      if (!decryptedData) {
         throw new Error("❌ Decryption failed: Empty output.");
       }
 
-      console.log("✅ Decrypted Base64 Data:", decryptedBase64);
+      console.log("✅ Decrypted File Data:", decryptedData);
 
-      // Convert Base64 to Binary Blob
-      const byteCharacters = atob(decryptedBase64);
+      // Convert decrypted data to Blob
+      const byteCharacters = atob(decryptedData);
       const byteArrays = new Uint8Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
         byteArrays[i] = byteCharacters.charCodeAt(i);
       }
 
-      const blob = new Blob([byteArrays], { type: "image/jpeg" }); // Adjust MIME type
+      const blob = new Blob([byteArrays], { type: "application/octet-stream" }); // Generic MIME type
       const objectUrl = URL.createObjectURL(blob);
       setRetrievedFile(objectUrl);
 
-      // 🔥 Call smart contract to delete encryption key **only if decryption succeeds**
+      // 🔥 Call smart contract to delete the encryption key **only if decryption succeeds**
       await accessAndDeleteKey();
       alert("✅ File successfully decrypted!");
 
@@ -164,7 +173,7 @@ function RetrievePhotoPage() {
               <img src={retrievedFile} alt="Retrieved" className="retrieved-image" />
             </div>
 
-            <a href={retrievedFile} download="decrypted-file.jpg" className="view-button glass-effect">
+            <a href={retrievedFile} download="decrypted-file" className="view-button glass-effect">
               <Image size={20} />
               <span>Download File</span>
             </a>
