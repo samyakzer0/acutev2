@@ -163,10 +163,11 @@ function RetrievePhotoPage() {
 
         {retrievedFile && (
           <div className="retrieved-content glass-effect">
-            <a href={retrievedFile} download={`decrypted-file.${fileType.split("/")[1]}`} className="view-button glass-effect">
-              <Download size={20} />
+            <a href={retrievedFile} download={`decrypted-file.${fileType}`} className="view-button glass-effect">
+            <Download size={20} />
               <span>Download File</span>
-            </a>
+              </a>
+
           </div>
         )}
       </div>
