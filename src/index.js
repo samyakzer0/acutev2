@@ -6,20 +6,6 @@ import App from "./App";
 import "./index.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-
-const requestAccount = async () => {
-    const { ethereum } = window;
-    if (!ethereum) {
-        alert("Please install MetaMask!");
-        return;
-    }
-
-    try {
-        await ethereum.request({ method: "eth_requestAccounts" });
-        root.render(<App />);
-    } catch (error) {
-        console.error("User denied account access:", error);
-    }
-};
+root.render(<App />);
 
 requestAccount();
