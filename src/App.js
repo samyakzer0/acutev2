@@ -1,14 +1,50 @@
 import React from 'react';
 import Spline from '@splinetool/react-spline';
 import { motion } from 'framer-motion';
+import { ethers, BrowserProvider } from "ethers";
 import { Shield, Image, Lock, Send, FileUp, FileDown, Camera, Download, Home } from 'lucide-react';
 import './App.css';
+import { Wallet } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Footer from "./Footer";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import SendPhotoPage from "./SendPhoto";
 import RetrievePhotoPage from "./RetrievePhoto";
 
 function App() {
+
+   const [menuOpen, setMenuOpen] = useState(false);
+  const [showOptions, setShowOptions] = useState(false); // Toggle menu state
+  const [walletAddress, setWalletAddress] = useState(null);
+
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      alert("MetaMask not detected! Please install MetaMask.");
+      return;
+    }
+
+    try {
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const address = await signer.getAddress();
+
+      setWalletAddress(address);
+      setShowOptions(false); // Hide options after connecting
+      console.log("✅ Connected Wallet:", address);
+    } catch (error) {
+      console.error("❌ Wallet connection failed:", error);
+      alert("Failed to connect wallet. Please try again.");
+    }
+  };
+
+  // 🔌 Disconnect Wallet
+  const disconnectWallet = () => {
+    setWalletAddress(null);
+    setShowOptions(false);
+    console.log("❌ Disconnected Wallet");
+  };
+
+  
   return (
     <Router>
       <div className="app-container">
@@ -41,6 +77,33 @@ function App() {
                 <span>Retrieve File</span>
               </Link>
             </motion.div>
+ <div className="wallet-container">
+            <button className="nav-button wallet-button" onClick={() => setShowOptions(!showOptions)}>
+              <Wallet size={24} />
+              {walletAddress
+                ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+                : "Connect"}
+            </button>
+
+            {showOptions && (
+              <div className="wallet-options glass-effect">
+                {walletAddress ? (
+                  <>
+                    <p className="wallet-address">{walletAddress}</p>
+                    <button className="disconnect-button" onClick={disconnectWallet}>
+                      <LogOut size={16} />
+                      Disconnect
+                    </button>
+                  </>
+                ) : (
+                  <button className="connect-button" onClick={connectWallet}>
+                    <Wallet size={16} />
+                    Connect Wallet
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
           </nav>
 </div>
         {/* Main Content */}
