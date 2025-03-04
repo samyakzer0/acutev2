@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Spline from '@splinetool/react-spline';
 import { motion } from 'framer-motion';
 import { ethers, BrowserProvider } from "ethers";
