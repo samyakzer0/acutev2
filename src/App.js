@@ -70,56 +70,60 @@ function App() {
         </div>
 <div className='container'>
 <nav className="nav-bar">
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="logo-container">
-            <Link to="/" className="logo-link">
-    
-    <img src="/icon.png" alt="Acute Logo" className="logo-icon" />
-  </Link>
-            </motion.div>
-            
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="nav-links">
-              <Link to="/" className="nav-button">
-                <Home size={20} />
-                <span>Home</span>
-              </Link>
-              <Link to="/send-photo" className="nav-button">
-                <Camera size={20} />
-                <span>Send File</span>
-              </Link>
-              <Link to="/retrieve-photo" className="nav-button">
-                <Download size={20} />
-                <span>Retrieve File</span>
-              </Link>
-            </motion.div>
- <div className="wallet-container">
-            <button className="nav-button wallet-button" onClick={() => setShowOptions(!showOptions)}>
-              <Wallet size={24} />
-              {walletAddress
-                ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
-                : "Connect"}
-            </button>
+  {/* Logo */}
+  <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="logo-container">
+    <Link to="/" className="logo-link">
+      <img src="/icon.png" alt="Acute Logo" className="logo-icon" />
+    </Link>
+  </motion.div>
 
-            {showOptions && (
-              <div className="wallet-options glass-effect">
-                {walletAddress ? (
-                  <>
-                    <p className="wallet-address">{walletAddress}</p>
-                    <button className="disconnect-button" onClick={disconnectWallet}>
-                      <LogOut size={16} />
-                      Disconnect
-                    </button>
-                  </>
-                ) : (
-                  <button className="connect-button" onClick={connectWallet}>
-                    <Wallet size={16} />
-                    Connect Wallet
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-          </nav>
-</div>
+  {/* Navigation Links */}
+  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="nav-links">
+    <Link to="/" className="nav-button">
+      <Home size={20} />
+      <span>Home</span>
+    </Link>
+    <Link to="/send-photo" className="nav-button">
+      <Camera size={20} />
+      <span>Send File</span>
+    </Link>
+    <Link to="/retrieve-photo" className="nav-button">
+      <Download size={20} />
+      <span>Retrieve File</span>
+    </Link>
+  </motion.div>
+
+  {/* Wallet Button */}
+  <div className="wallet-container">
+    <button className="wallet-button" onClick={() => setShowOptions(!showOptions)}>
+      <Wallet size={24} />
+      {walletAddress
+        ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+        : "Connect"}
+    </button>
+
+    {/* Wallet Options Dropdown */}
+    {showOptions && (
+      <div className="wallet-options glass-effect">
+        {walletAddress ? (
+          <>
+            <p className="wallet-address">{walletAddress}</p>
+            <button className="disconnect-button" onClick={disconnectWallet}>
+              <LogOut size={16} />
+              Disconnect
+            </button>
+          </>
+        ) : (
+          <button className="connect-button" onClick={connectWallet}>
+            <Wallet size={16} />
+            Connect Wallet
+          </button>
+        )}
+      </div>
+    )}
+  </div>
+</nav>
+
         {/* Main Content */}
         <div className="content-wrapper">
           <Routes>
