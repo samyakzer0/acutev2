@@ -17,6 +17,20 @@ function App() {
   const [showOptions, setShowOptions] = useState(false); // Toggle menu state
   const [walletAddress, setWalletAddress] = useState(null);
 
+   const requestAccount = async () => {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        setWalletAddress(accounts[0]);
+        console.log("Connected Account:", accounts[0]);
+      } catch (error) {
+        console.error("Wallet connection failed:", error);
+      }
+    } else {
+      console.log("MetaMask is not installed");
+    }
+  };
+
   const connectWallet = async () => {
     if (!window.ethereum) {
       alert("MetaMask not detected! Please install MetaMask.");
