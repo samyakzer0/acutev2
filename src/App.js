@@ -123,7 +123,7 @@ function App() {
     )}
   </div>
 </nav>
-
+</div>
         {/* Main Content */}
         <div className="content-wrapper">
           <Routes>
