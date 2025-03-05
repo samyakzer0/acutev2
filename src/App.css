@@ -1083,11 +1083,6 @@
   gap: 0.5rem;
 }
 
-.logo-icon {
-  width: 50px; /* ✅ Reduce size to prevent header overflow */
-  height: 50px;
-}
-
 /* Navigation Links */
 .nav-links {
   display: flex;
