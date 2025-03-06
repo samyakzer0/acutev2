@@ -215,10 +215,7 @@ function HomePage() {
       {/* Hero Section */}
       <div className="hero-section">
         {/* Spline Object Container */}
-        <div className="spline-container">
-          <Spline scene="https://prod.spline.design/i8BWWbD-qVzHA2DO/scene.splinecode" />
-        </div>
-
+    
         <div className="container">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
