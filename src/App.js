@@ -145,9 +145,6 @@ function HomePage() {
       {/* Hero Section */}
       <div className="hero-section">
         {/* Spline Object Container */}
-        <div className="spline-container">
-         <Spline scene="https://prod.spline.design/D303NP1vW4ZPlbwq/scene.splinecode" />
-         </div>
 
         
         <div className="container">
