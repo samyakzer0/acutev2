@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
   --primary: #6366f1;
@@ -11,7 +11,6 @@
   --error: #ef4444;
   --success: #22c55e;
 }
-
 
 /* Progress Bar */
 .progress-container {
@@ -117,7 +116,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -168,19 +168,89 @@
 /* Navigation */
 .nav-bar {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 5rem;
+  justify-content: space-between; /* ✅ Keeps wallet button inside */
+  align-items: center; /* ✅ Centers all items */
+  width: 100%; /* ✅ Makes sure it spans the full header */
   background-color: rgba(209, 136, 222, 0.1); /* Light tint color */
   backdrop-filter: blur(5px); /* Glass effect */
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Border for the glass effect */
-  border-radius: 8px; /* Rounded corners */
-  height: 8rem; /* Set a fixed height */
-  padding: 10px 25px; /* Padding for spacing */
-  width: calc(100% + 2rem); /* Extend width to full screen size */
-  max-width: none; /* Limit the width */
-  margin-left: -1rem; /* Center the navbar */
-  margin-right: -1rem; /* Center the navbar */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  height: 6rem; /* ✅ Reduce height to fit better */
+  padding: 10px 25px;
+  max-width: 1280px; /* ✅ Prevents navbar from stretching too much */
+  margin: auto; /* ✅ Centers navbar */
+}
+
+/* Fix Logo Container */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Navigation Links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* ✅ Spaces out the nav links */
+}
+
+/* Wallet Container - Keep it inside the navbar */
+.wallet-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+/* Wallet Button */
+.wallet-button {
+  background: linear-gradient(to right, #6366f1, #a855f7);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* ✅ Adds space between icon and text */
+}
+
+.wallet-button:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+/* Wallet Options Dropdown */
+.wallet-options {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background-color: rgba(15, 23, 42, 0.9);
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Disconnect Button */
+.disconnect-button {
+  background: #ef4444;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.disconnect-button:hover {
+  background: #dc2626;
 }
 
 .connect-button {
@@ -197,12 +267,6 @@
 .connect-button:hover {
   opacity: 0.9;
   box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
 }
 
 .logo-box {
@@ -225,12 +289,6 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
 }
 
 .nav-button {
@@ -272,12 +330,56 @@
     padding: 6px 20px;
     font-size: 0.75rem;
   }
+
+  .nav-links {
+    gap: 1rem; /* Reduce gap between nav links on smaller screens */
+  }
+
+  .nav-bar {
+    height: 5rem;
+    padding: 0 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .logo-text {
+    font-size: 1.5rem; /* Smaller logo text on mobile */
+  }
+
+  /* Mobile wallet button */
+  .wallet-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
 }
 
 @media (max-width: 480px) {
   .nav-button {
     padding: 4px 16px;
     font-size: 0.625rem;
+  }
+
+  .nav-links {
+    gap: 0.5rem; /* Further reduce gap on very small screens */
+  }
+
+  .logo-box {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1.125rem;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
+  }
+
+  .connect-button {
+    padding: 0.75rem 1rem; /* Smaller padding */
+    font-size: 0.875rem; /* Smaller font */
+  }
+
+  .nav-bar {
+    height: 4.5rem;
+    padding: 0 1rem;
   }
 }
 
@@ -373,7 +475,7 @@
 }
 
 .send-button::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background-color: rgba(255, 255, 255, 0.2);
@@ -408,7 +510,7 @@
 }
 
 .retrieve-button::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background-image: linear-gradient(to right, rgba(168, 85, 247, 0), rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0));
@@ -459,7 +561,7 @@
     width: 75%; /* Increased from 60% to 75% */
     right: -10%; /* Changed from -5% to -10% */
   }
-  
+
   .hero-content {
     width: 45%; /* Reduced from 50% to 45% to make more space */
   }
@@ -470,9 +572,27 @@
     width: 65%; /* Increased from 50% to 65% */
     right: -5%; /* Changed from 0 to -5% */
   }
-  
+
   .hero-content {
     width: 55%; /* Reduced from 60% to 55% */
+  }
+
+  .hero-title {
+    font-size: 3.5rem; /* Smaller title on medium screens */
+  }
+
+  .hero-description {
+    font-size: 1.125rem; /* Smaller description text */
+  }
+
+  .button-group {
+    gap: 1rem; /* Reduce gap between buttons */
+  }
+
+  .send-button,
+  .retrieve-button {
+    padding: 0.875rem 1.5rem; /* Smaller padding */
+    font-size: 1rem; /* Smaller font size */
   }
 }
 
@@ -482,19 +602,53 @@
     position: relative;
     height: 50vh;
     order: 1;
+    right: 0; /* Reset right positioning */
   }
-  
+
   .hero-section {
     flex-direction: column;
   }
-  
+
   .hero-content {
     width: 100%;
     order: 2;
+    margin-top: 2rem; /* Reduce top margin */
   }
-  
+
   .hero-title {
     font-size: 2.5rem;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .button-group {
+    flex-direction: column; /* Stack buttons on very small screens */
+    width: 100%;
+  }
+
+  .send-button,
+  .retrieve-button {
+    width: 100%; /* Full width buttons */
+    justify-content: center;
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem; /* Even smaller title on very small screens */
+  }
+
+  .tag {
+    padding: 0.375rem 1rem; /* Smaller tag padding */
+    font-size: 0.75rem; /* Smaller tag font */
+  }
+
+  .features-section {
+    padding: 4rem 1rem; /* Reduce padding */
   }
 }
 
@@ -515,7 +669,7 @@
 }
 
 .feature-card::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background-image: linear-gradient(to bottom right, rgba(147, 51, 234, 0.2), rgba(219, 39, 119, 0.2));
@@ -528,7 +682,7 @@
 }
 
 .feature-card::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background-image: linear-gradient(to bottom right, rgba(147, 51, 234, 0.1), rgba(147, 51, 234, 0.05), transparent);
@@ -587,15 +741,14 @@
   border-radius: 1.5rem;
   border: 1px solid rgba(168, 85, 247, 0.2);
   padding: 2.5rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 
-              0 0 20px rgba(168, 85, 247, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 0 20px rgba(168, 85, 247, 0.15);
   animation: fadeIn 0.5s ease;
   position: relative;
   overflow: hidden;
 }
 
 .form-container::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background-image: linear-gradient(to bottom right, rgba(147, 51, 234, 0.1), rgba(219, 39, 119, 0.1));
@@ -603,8 +756,14 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .section-title {
@@ -732,7 +891,7 @@
 }
 
 .action-button::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background-color: rgba(255, 255, 255, 0.1);
@@ -767,13 +926,15 @@
   box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
 }
 
-.send-button, .retrieve-button {
+.send-button,
+.retrieve-button {
   background-image: linear-gradient(to bottom right, #9333ea, #db2777);
   color: white;
   box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
 }
 
-.send-button:hover:not(:disabled), .retrieve-button:hover:not(:disabled) {
+.send-button:hover:not(:disabled),
+.retrieve-button:hover:not(:disabled) {
   box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
 }
 
@@ -862,8 +1023,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Glass Effect */
@@ -901,14 +1066,13 @@
   background-image: linear-gradient(to bottom right, rgba(168, 85, 247, 0.1), rgba(219, 39, 119, 0.1));
   backdrop-filter: blur(16px);
   border-top: 1px solid rgba(168, 85, 247, 0.2);
-  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.2), 
-              0 0 15px rgba(168, 85, 247, 0.1);
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.2), 0 0 15px rgba(168, 85, 247, 0.1);
   position: relative;
   overflow: hidden;
 }
 
 .footer::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background-image: linear-gradient(to bottom right, rgba(147, 51, 234, 0.05), rgba(219, 39, 119, 0.05));
@@ -991,16 +1155,16 @@
   .footer {
     padding: 2rem 1rem;
   }
-  
+
   .footer-content h3 {
     font-size: 1.5rem;
   }
-  
+
   .footer-links {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .footer-links a {
     width: 100%;
     justify-content: center;
@@ -1060,91 +1224,388 @@
   height: 150px; /* Adjust the height as needed */
 }
 
-/* Navigation Bar */
-.nav-bar {
-  display: flex;
-  justify-content: space-between; /* ✅ Keeps wallet button inside */
-  align-items: center; /* ✅ Centers all items */
-  width: 100%; /* ✅ Makes sure it spans the full header */
-  background-color: rgba(209, 136, 222, 0.1); /* Light tint color */
-  backdrop-filter: blur(5px); /* Glass effect */
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  height: 6rem; /* ✅ Reduce height to fit better */
-  padding: 10px 25px;
-  max-width: 1280px; /* ✅ Prevents navbar from stretching too much */
-  margin: auto; /* ✅ Centers navbar */
-}
-
-/* Fix Logo Container */
-.logo-container {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* Navigation Links */
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem; /* ✅ Spaces out the nav links */
-}
-
-/* Wallet Container - Keep it inside the navbar */
-.wallet-container {
-  display: flex;
-  align-items: center;
+/* Hamburger Menu Styles - Add these to your existing CSS */
+.hamburger-menu {
+  display: none; /* Hidden by default on larger screens */
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  cursor: pointer;
+  z-index: 100;
   position: relative;
 }
 
-/* Wallet Button */
-.wallet-button {
-  background: linear-gradient(to right, #6366f1, #a855f7);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 8px; /* ✅ Adds space between icon and text */
+.hamburger-menu span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  border-radius: 3px;
+  background: linear-gradient(to right, #a78bfa, #db2777);
+  transition: all 0.3s ease-in-out;
 }
 
-.wallet-button:hover {
-  opacity: 0.9;
-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+/* Mobile Menu Container */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 350px;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  border-left: 1px solid rgba(168, 85, 247, 0.2);
+  z-index: 99;
+  padding: 6rem 2rem 2rem;
+  transition: right 0.4s cubic-bezier(0.77, 0.2, 0.05, 1.0);
+  overflow-y: auto;
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.3);
 }
 
-/* Wallet Options Dropdown */
-.wallet-options {
-  position: absolute;
-  top: 110%;
+.mobile-menu.open {
   right: 0;
-  background-color: rgba(15, 23, 42, 0.9);
-  padding: 12px;
-  border-radius: 8px;
+}
+
+/* Mobile Menu Links */
+.mobile-nav-links {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  gap: 1.5rem;
 }
 
-/* Disconnect Button */
-.disconnect-button {
-  background: #ef4444;
+.mobile-nav-links a {
+  display: block;
+  padding: 0.75rem 1rem;
   color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
+  font-size: 1.125rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: all 0.3s;
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.mobile-nav-links a:hover {
+  background: rgba(168, 85, 247, 0.2);
+  transform: translateX(5px);
+}
+
+/* Hamburger Animation */
+.hamburger-menu.open span:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.hamburger-menu.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-menu.open span:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Overlay for mobile menu */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 98;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Logo visibility fix */
+@media (max-width: 768px) {
+  .hamburger-menu {
+    display: flex; /* Show hamburger on mobile */
+  }
+
+  .nav-links {
+    display: none; /* Hide regular nav links on mobile */
+  }
+
+  /* Ensure logo is visible on mobile */
+  .logo-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .logo-box {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.25rem;
+  }
+
+  .logo-text {
+    font-size: 1.5rem;
+    display: block; /* Ensure it's visible */
+  }
+
+  /* Adjust navbar height for mobile */
+  .nav-bar {
+    height: 5rem;
+    padding: 0 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  /* Mobile wallet button */
+  .wallet-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .logo-box {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1.125rem;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
+  }
+
+  .nav-bar {
+    height: 4.5rem;
+    padding: 0 1rem;
+  }
+}
+
+/* Ensure proper display on tablets */
+@media (min-width: 481px) and (max-width: 768px) {
+  /* Adjust background elements for better appearance */
+  .bg-purple,
+  .bg-blue {
+    width: 300px;
+    height: 300px;
+  }
+
+  .bg-center {
+    width: 500px;
+    height: 500px;
+  }
+
+  /* Ensure buttons in button group have proper spacing */
+  .button-group {
+    justify-content: center;
+  }
+}
+
+/* Add these styles to your App.css file */
+
+/* Hamburger Menu Styles */
+.hamburger-menu {
+  display: none; /* Hidden by default on larger screens */
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  cursor: pointer;
+  z-index: 100;
+  position: relative;
+}
+
+.hamburger-menu span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  border-radius: 3px;
+  background: linear-gradient(to right, #a78bfa, #db2777);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Mobile Menu Container */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 350px;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  border-left: 1px solid rgba(168, 85, 247, 0.2);
+  z-index: 99;
+  padding: 6rem 2rem 2rem;
+  transition: right 0.4s cubic-bezier(0.77, 0.2, 0.05, 1.0);
+  overflow-y: auto;
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-menu.open {
+  right: 0;
+}
+
+/* Mobile Menu Links */
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.mobile-nav-links a {
   display: flex;
   align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: 0.2s;
+  padding: 0.75rem 1rem;
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: all 0.3s;
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid rgba(168, 85, 247, 0.2);
 }
 
-.disconnect-button:hover {
-  background: #dc2626;
+.mobile-nav-links a:hover {
+  background: rgba(168, 85, 247, 0.2);
+  transform: translateX(5px);
 }
+
+/* Hamburger Animation */
+.hamburger-menu.open span:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.hamburger-menu.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-menu.open span:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Overlay for mobile menu */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 98;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mobile wallet styles */
+.mobile-wallet-button {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: all 0.3s;
+  background: linear-gradient(to right, #6366f1, #a855f7);
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  justify-content: center;
+}
+
+.mobile-wallet-info {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.mobile-wallet-address {
+  display: flex;
+  align-items: center;
+  color: white;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.mobile-disconnect-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem;
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.mobile-disconnect-button:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+  .hamburger-menu {
+    display: flex; /* Show hamburger on mobile */
+  }
+
+  .nav-links {
+    display: none; /* Hide regular nav links on mobile */
+  }
+
+  /* Ensure logo is visible on mobile */
+  .logo-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Adjust navbar height for mobile */
+  .nav-bar {
+    height: 5rem;
+    padding: 0 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  /* Mobile wallet button */
+  .wallet-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .nav-bar {
+    height: 4.5rem;
+    padding: 0 1rem;
+  }
+}
+
 
