@@ -472,24 +472,24 @@ function HomePage() {
         <motion.div className="features-grid">
           {[
             {
-              icon: Shield,
-              title: "Secure Transfer",
-              description: "End-to-end encrypted photo sharing using blockchain technology",
+               icon: Shield,
+              title: "Military-Grade Security",
+              description: "Base64 encryption and blockchain verification for maximum data protection",
             },
             {
               icon: Image,
-              title: "IPFS Storage",
-              description: "Decentralized storage ensuring your photos are always accessible",
+              title: "Instant File Access",
+              description: "Lightning-fast file retrieval with IPFS-powered decentralized storage",
             },
             { 
               icon: Lock, 
-              title: "Smart Contracts", 
-              description: "Ethereum-based contracts managing access control" 
+              title: "Smart Access Control", 
+              description: "Automated permission management through Ethereum smart contracts" 
             },
             { 
               icon: Send, 
-              title: "Easy Sharing", 
-              description: "User-friendly interface for seamless photo sharing" 
+              title: "One-Click Sharing", 
+              description: "Smooth interface for secure file transfers with real-time status updates"  
             },
           ].map((feature, index) => (
             <motion.div 
