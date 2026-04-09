@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Spline from "@splinetool/react-spline"
 import { motion, AnimatePresence } from "framer-motion"
 import { Shield, Image, Lock, Send, FileUp, FileDown, Camera, Download, Home, Wallet, LogOut, Menu, X } from "lucide-react"
 import "./App.css"
@@ -17,7 +16,6 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [showOptions, setShowOptions] = useState(false) // Toggle menu state
   const [walletAddress, setWalletAddress] = useState(null)
-  const [gridCells, setGridCells] = useState([])
   const [chainWarning, setChainWarning] = useState("")
 
   const refreshWalletState = async () => {

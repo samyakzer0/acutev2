@@ -45,7 +45,6 @@ export default function SendPhotoPage() {
   const [ipfsHash, setIpfsHash] = useState("");
   const [otp, setOtp] = useState(null);
   const [encryptionKey, setEncryptionKey] = useState("");
-  const [fileType, setFileType] = useState("");
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
   const [networkWarning, setNetworkWarning] = useState("");
@@ -62,7 +61,6 @@ export default function SendPhotoPage() {
   const onDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
     setSelectedFile(file);
-    setFileType(file.type);
 
     if (file.type.startsWith("image")) {
       const objectUrl = URL.createObjectURL(file);
@@ -71,7 +69,7 @@ export default function SendPhotoPage() {
     }
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     multiple: false,
   });

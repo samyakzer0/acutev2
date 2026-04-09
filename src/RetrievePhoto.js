@@ -260,6 +260,13 @@ function RetrievePhotoPage() {
       <div className="form-container glass-effect">
         <h2 className="section-title">Retrieve File!</h2>
 
+        {walletAddress && (
+          <div className="info-box glass-effect">
+            <p className="label">Connected Wallet</p>
+            <p className="value">{walletAddress}</p>
+          </div>
+        )}
+
         <div className="otp-input-container glass-effect">
           <input
             type="text"
@@ -290,6 +297,13 @@ function RetrievePhotoPage() {
         )}
 
         <TxStatus txState={txState} txMessage={txMessage} txHash={txHash} />
+
+        {ipfsHash && (
+          <div className="info-box glass-effect">
+            <p className="label">Retrieved IPFS Hash</p>
+            <p className="value">{ipfsHash}</p>
+          </div>
+        )}
 
         {retrievedFile && (
           <div className="retrieved-content glass-effect">
