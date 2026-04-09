@@ -5,8 +5,39 @@ import { ethers } from "ethers";
 import CryptoJS from "crypto-js";
 import { Upload, Send, Loader } from "lucide-react";
 import PhotoZappABI from "./artifacts/PhotoTransfer.json";
+import { BACKEND_BASE_URL, CHAIN_NAME, CONTRACT_ADDRESS, getTxExplorerUrl } from "./config/web3";
+import { ensureExpectedNetwork, getCurrentChainHex } from "./utils/network";
 
-const CONTRACT_ADDRESS = "0x444CE1A913DEDBAEE39eD59B77B3D7D5De6b7452";
+const TX_STATE = {
+  idle: "idle",
+  awaitingSignature: "awaiting-signature",
+  pending: "pending",
+  confirmed: "confirmed",
+  error: "error"
+};
+
+function TxStatus({ txState, txMessage, txHash }) {
+  if (txState === TX_STATE.idle) {
+    return null;
+  }
+
+  const className = txState === TX_STATE.confirmed
+    ? "status-badge success"
+    : txState === TX_STATE.error
+      ? "status-badge error"
+      : "status-badge pending";
+
+  return (
+    <div className="info-box glass-effect">
+      <div className={className}>{txMessage}</div>
+      {txHash && (
+        <p className="hint" style={{ marginTop: "0.75rem" }}>
+          Tx: <a href={getTxExplorerUrl(txHash)} target="_blank" rel="noreferrer">{txHash}</a>
+        </p>
+      )}
+    </div>
+  );
+}
 
 export default function SendPhotoPage() {
   const [recipient, setRecipient] = useState("");
@@ -17,6 +48,16 @@ export default function SendPhotoPage() {
   const [fileType, setFileType] = useState("");
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
+  const [networkWarning, setNetworkWarning] = useState("");
+  const [txState, setTxState] = useState(TX_STATE.idle);
+  const [txMessage, setTxMessage] = useState("");
+  const [txHash, setTxHash] = useState("");
+
+  const setTx = (state, message, hash = "") => {
+    setTxState(state);
+    setTxMessage(message);
+    setTxHash(hash);
+  };
 
   const onDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
@@ -73,7 +114,7 @@ export default function SendPhotoPage() {
       const formData = new FormData();
       formData.append("file", new Blob([encryptedData], { type: "application/octet-stream" }));
 
-      const response = await axios.post("https://acutev2.onrender.com/upload", formData, {
+      const response = await axios.post(`${BACKEND_BASE_URL}/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -96,13 +137,31 @@ export default function SendPhotoPage() {
       return;
     }
 
+    const trimmedRecipient = recipient.trim();
+    if (!ethers.isAddress(trimmedRecipient)) {
+      alert("Please enter a valid recipient wallet address.");
+      return;
+    }
+
     try {
       setLoading(true);
+      setNetworkWarning("");
+      setTx(TX_STATE.idle, "");
 
-      // Generate OTP
+      const chainHex = await getCurrentChainHex();
+      const switched = await ensureExpectedNetwork();
+      if (!switched) {
+        setNetworkWarning(`Please switch your wallet to ${CHAIN_NAME} to continue.`);
+        return;
+      }
+      if (!chainHex) {
+        setNetworkWarning("Wallet not available. Please connect MetaMask.");
+        return;
+      }
+
       console.log("📢 Requesting OTP...");
-      const otpResponse = await axios.post("https://acutev2.onrender.com/generate-otp", {
-        recipient,
+      const otpResponse = await axios.post(`${BACKEND_BASE_URL}/generate-otp`, {
+        recipient: trimmedRecipient,
         ipfsHash
       });
       const generatedOtp = otpResponse.data.otp;
@@ -118,23 +177,38 @@ export default function SendPhotoPage() {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, PhotoZappABI, signer);
 
+      setTx(TX_STATE.awaitingSignature, "Awaiting wallet signature...");
       console.log("🚀 Sending transaction...");
       const tx = await contract.sendFile(
-        recipient, 
-        ipfsHash, 
-        encryptionKey,  // ✅ Directly storing encryption key, no extra encryption
+        trimmedRecipient,
+        ipfsHash,
+        encryptionKey,
         String(generatedOtp)
       );
-      await tx.wait(); // Wait for confirmation
+      setTx(TX_STATE.pending, "Transaction submitted. Waiting for confirmation...", tx.hash);
+      await tx.wait();
 
       console.log("✅ Transaction successful:", tx);
+      setTx(TX_STATE.confirmed, "Transaction confirmed.", tx.hash);
       alert(`File sent successfully! Transaction Hash: ${tx.hash}`);
 
     } catch (error) {
       console.error("❌ Transaction failed:", error);
+      setTx(TX_STATE.error, error?.shortMessage || error?.message || "Transaction failed");
       alert("Failed to send photo. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSwitchNetwork = async () => {
+    try {
+      const switched = await ensureExpectedNetwork();
+      if (switched) {
+        setNetworkWarning("");
+      }
+    } catch (error) {
+      setNetworkWarning(`Failed to switch network: ${error.message}`);
     }
   };
 
@@ -181,6 +255,18 @@ export default function SendPhotoPage() {
           {loading ? <Loader className="spin" /> : <Send size={20} />}
           <span>{loading ? "Processing..." : "Send File"}</span>
         </button>
+
+        {networkWarning && (
+          <div className="info-box glass-effect">
+            <p className="label">Network Guardrail</p>
+            <p className="value">{networkWarning}</p>
+            <button className="action-button" onClick={handleSwitchNetwork} type="button">
+              Switch to {CHAIN_NAME}
+            </button>
+          </div>
+        )}
+
+        <TxStatus txState={txState} txMessage={txMessage} txHash={txHash} />
 
         {otp && (
           <div className="info-box glass-effect success">

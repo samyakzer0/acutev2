@@ -10,12 +10,37 @@ import Footer from "./Footer"
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom"
 import SendPhotoPage from "./SendPhoto"
 import RetrievePhotoPage from "./RetrievePhoto"
+import { CHAIN_NAME, EXPECTED_CHAIN_HEX } from "./config/web3"
+import { getCurrentChainHex } from "./utils/network"
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [showOptions, setShowOptions] = useState(false) // Toggle menu state
   const [walletAddress, setWalletAddress] = useState(null)
   const [gridCells, setGridCells] = useState([])
+  const [chainWarning, setChainWarning] = useState("")
+
+  const refreshWalletState = async () => {
+    if (!window.ethereum) {
+      setWalletAddress(null)
+      setChainWarning("")
+      return
+    }
+
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_accounts" })
+      setWalletAddress(accounts?.[0] || null)
+
+      const chainHex = await getCurrentChainHex()
+      if (chainHex && chainHex !== EXPECTED_CHAIN_HEX) {
+        setChainWarning(`Connected to wrong network. Please switch to ${CHAIN_NAME}.`)
+      } else {
+        setChainWarning("")
+      }
+    } catch (error) {
+      console.error("❌ Failed to refresh wallet state:", error)
+    }
+  }
 
   // Close mobile menu when window is resized to desktop size
   useEffect(() => {
@@ -68,6 +93,30 @@ function App() {
     return () => window.removeEventListener('resize', createGrid)
   }, [])
 
+  useEffect(() => {
+    refreshWalletState()
+
+    if (!window.ethereum) {
+      return
+    }
+
+    const handleAccountsChanged = (accounts) => {
+      setWalletAddress(accounts?.[0] || null)
+    }
+
+    const handleChainChanged = () => {
+      refreshWalletState()
+    }
+
+    window.ethereum.on("accountsChanged", handleAccountsChanged)
+    window.ethereum.on("chainChanged", handleChainChanged)
+
+    return () => {
+      window.ethereum.removeListener("accountsChanged", handleAccountsChanged)
+      window.ethereum.removeListener("chainChanged", handleChainChanged)
+    }
+  }, [])
+
   // 🏆 Connect to MetaMask
   const connectWallet = async () => {
     if (!window.ethereum) {
@@ -98,6 +147,7 @@ function App() {
       const address = await signer.getAddress();
   
       setWalletAddress(address);
+      await refreshWalletState();
       setShowOptions(false);
       console.log("✅ Connected Wallet:", address);
     } catch (error) {
@@ -176,6 +226,13 @@ function App() {
         </motion.div>
 
         <div className="container">
+          {chainWarning && (
+            <div className="info-box glass-effect" style={{ marginBottom: "1rem" }}>
+              <p className="label">Network Guardrail</p>
+              <p className="value">{chainWarning}</p>
+            </div>
+          )}
+
           <motion.nav 
             className="nav-bar"
             initial={{ y: -100, opacity: 0 }}
